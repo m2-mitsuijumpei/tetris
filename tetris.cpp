@@ -14,21 +14,22 @@ using namespace std;
 int scorelec = 0;
 int levellec = 0;
 
-// ƒeƒgƒŠƒ~ƒm‚Ì’è‹`
+// ãƒ†ãƒˆãƒªãƒŸãƒã®å®šç¾©
 const array<string, 7> tetromino = {
-    "..X...X...X...X.",
-    "..X..XX...X.....",
-    ".....XX..XX.....",
-    "..X..XX..X......",
-    ".X...XX...X.....",
-    ".X...X...XX.....",
-    "..X...X..XX....."
+    "..X...X...X...X.", // Iå‹
+    "..X..XX...X.....", // Tå‹
+    ".....XX..XX.....", // Oå‹
+    "..X..XX..X......", // Så‹
+    ".X...XX...X.....", // Zå‹
+    ".X...X...XX.....", // Lå‹
+    "..X...X..XX....."  // Jå‹
 };
 
-// ƒtƒB[ƒ‹ƒh‚ÌƒTƒCƒY
+// ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã®ã‚µã‚¤ã‚º
 const int fieldWidth = 12;
 const int fieldHeight = 18;
 
+// ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã‚¯ãƒ©ã‚¹
 class Field {
 public:
     Field(int width, int height)
@@ -81,8 +82,9 @@ public:
                 linesCleared++;
             }
         }
+        // ä¸€åˆ—ãã‚ã£ãŸæ™‚ã®åŠ¹æœéŸ³
         if (linesCleared > 0) {
-            thread([]() { mciSendString(L"play line_clear.wav", NULL, 0, NULL); }).detach(); // sƒNƒŠƒA‰¹
+            thread([]() { mciSendString(L"play line_clear.wav", NULL, 0, NULL); }).detach(); // è¡Œã‚¯ãƒªã‚¢éŸ³
         }
         return linesCleared;
     }
@@ -93,6 +95,7 @@ private:
     vector<char> field;
 };
 
+// ãƒ†ãƒˆãƒªãƒŸãƒã‚¯ãƒ©ã‚¹
 class Tetromino {
 public:
     Tetromino(int type, int rotation, int posX, int posY)
@@ -100,10 +103,10 @@ public:
 
     int Rotate(int px, int py, int rotation) const {
         switch (rotation % 4) {
-        case 0: return py * 4 + px;         // 0“x
-        case 1: return 12 + py - (px * 4);  // 90“x
-        case 2: return 15 - (py * 4) - px;  // 180“x
-        case 3: return 3 - py + (px * 4);   // 270“x
+        case 0: return py * 4 + px;         // 0åº¦
+        case 1: return 12 + py - (px * 4);  // 90åº¦
+        case 2: return 15 - (py * 4) - px;  // 180åº¦
+        case 3: return 3 - py + (px * 4);   // 270åº¦
         }
         return 0;
     }
@@ -177,16 +180,19 @@ private:
     int posY;
 };
 
+// BGMç®¡ç†ç”¨é–¢æ•°
+// å†ç”Ÿ
 void PlayBGM() {
     mciSendString(L"open \"bgm.wav\" type mpegvideo alias bgm", NULL, 0, NULL);
     mciSendString(L"play bgm repeat", NULL, 0, NULL);
 }
-
+// åœæ­¢
 void StopBGM() {
     mciSendString(L"stop bgm", NULL, 0, NULL);
     mciSendString(L"close bgm", NULL, 0, NULL);
 }
 
+// ç”»é¢ã‚’ã‚¯ãƒªã‚¢ã™ã‚‹é–¢æ•°
 void ClearConsole() {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -195,20 +201,21 @@ void ClearConsole() {
 
     if (hConsole == INVALID_HANDLE_VALUE) return;
 
-    // Œ»İ‚Ìƒoƒbƒtƒ@‚ÌƒTƒCƒY‚ğæ“¾
+    // ç¾åœ¨ã®ãƒãƒƒãƒ•ã‚¡ã®ã‚µã‚¤ã‚ºã‚’å–å¾—
     if (!GetConsoleScreenBufferInfo(hConsole, &csbi)) return;
     cellCount = csbi.dwSize.X * csbi.dwSize.Y;
 
-    // ‰æ–Ê‚ğ‹ó”’‚Å–„‚ß‚é
+    // ç”»é¢ã‚’ç©ºç™½ã§åŸ‹ã‚ã‚‹
     if (!FillConsoleOutputCharacter(hConsole, (TCHAR)' ', cellCount, homeCoords, &count)) return;
 
-    // Œ»İ‚Ì‘®«‚ğg‚Á‚Ä‰æ–Ê‚ğ–„‚ß‚é
+    // ç¾åœ¨ã®å±æ€§ã‚’ä½¿ã£ã¦ç”»é¢ã‚’åŸ‹ã‚ã‚‹
     if (!FillConsoleOutputAttribute(hConsole, csbi.wAttributes, cellCount, homeCoords, &count)) return;
 
-    // ƒJ[ƒ\ƒ‹‚ğ¶ã‚ÉˆÚ“®
+    // ã‚«ãƒ¼ã‚½ãƒ«ã‚’å·¦ä¸Šã«ç§»å‹•
     SetConsoleCursorPosition(hConsole, homeCoords);
 }
 
+// æ¬¡ã®ãƒ†ãƒˆãƒªãƒŸãƒã‚’è¡¨ç¤ºã™ã‚‹é–¢æ•°
 void DrawNextTetromino(HANDLE hConsole, int nextPiece, int cursorX, int cursorY) {
     COORD coord;
     coord.X = cursorX;
@@ -233,26 +240,28 @@ void DrawNextTetromino(HANDLE hConsole, int nextPiece, int cursorX, int cursorY)
     }
 }
 
+// ã‚²ãƒ¼ãƒ ã®ãƒ¡ã‚¤ãƒ³ãƒ«ãƒ¼ãƒ—é–¢æ•°
 bool PlayGame(HANDLE hConsole) {
     Field field(fieldWidth, fieldHeight);
     int currentPiece = rand() % 7;
-    int nextPiece = rand() % 7; // Ÿ‚ÌƒeƒgƒŠƒ~ƒm‚ğŠÇ—
-    Tetromino tetromino(currentPiece, 0, fieldWidth / 2 - 2, 0); // ‰ŠúˆÊ’u‚ğC³
+    int nextPiece = rand() % 7; // æ¬¡ã®ãƒ†ãƒˆãƒªãƒŸãƒã‚’ç®¡ç†
+    Tetromino tetromino(currentPiece, 0, fieldWidth / 2 - 2, 0); // åˆæœŸä½ç½®ã‚’ä¿®æ­£
     int score = 0;
     int speed = 20;
     int speedCount = 0;
     int level = 0;
     bool gameOver = false;
 
-    int cursorX = 0, cursorY = 0; // ƒRƒ“ƒ\[ƒ‹ƒJ[ƒ\ƒ‹‚Ì‰ŠúˆÊ’u
+    int cursorX = 0, cursorY = 0; // ã‚³ãƒ³ã‚½ãƒ¼ãƒ«ã‚«ãƒ¼ã‚½ãƒ«ã®åˆæœŸä½ç½®
 
-    PlayBGM(); // ƒQ[ƒ€ŠJn‚Æ“¯‚ÉBGM‚ğÄ¶
+    PlayBGM(); // ã‚²ãƒ¼ãƒ é–‹å§‹ã¨åŒæ™‚ã«BGMã‚’å†ç”Ÿ
 
     while (!gameOver) {
         this_thread::sleep_for(chrono::milliseconds(50));
         speedCount++;
         bool forceDown = (speedCount == speed);
 
+        // ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰å…¥åŠ›
         if (_kbhit()) {
             switch (_getch()) {
             case 'a':
@@ -285,27 +294,28 @@ bool PlayGame(HANDLE hConsole) {
                 int lines = field.ClearLines();
                 if (lines > 0) score += (1 << lines) * 100;
                 currentPiece = nextPiece;
-                nextPiece = rand() % 7; // Ÿ‚ÌƒeƒgƒŠƒ~ƒm‚ğXV
+                nextPiece = rand() % 7; // æ¬¡ã®ãƒ†ãƒˆãƒªãƒŸãƒã‚’æ›´æ–°
                 tetromino = Tetromino(currentPiece, 0, fieldWidth / 2 - 2, 0);
                 gameOver = !tetromino.DoesFit(field);
+                // ã‚²ãƒ¼ãƒ ã‚ªãƒ¼ãƒãƒ¼æ™‚ã®åŠ¹æœéŸ³
                 if (gameOver) {
-                    mciSendString(L"play game_over.wav", NULL, 0, NULL); // ƒQ[ƒ€ƒI[ƒo[‚Ì‰¹
+                    mciSendString(L"play game_over.wav", NULL, 0, NULL); // ã‚²ãƒ¼ãƒ ã‚ªãƒ¼ãƒãƒ¼ã®éŸ³
                 }
 
-                // ƒXƒRƒA‚É‰‚¶‚Ä‘¬“x‚ğã‚°‚é
+                // ã‚¹ã‚³ã‚¢ã«å¿œã˜ã¦é€Ÿåº¦ã‚’ä¸Šã’ã‚‹
                 if (score / 1000 > level) {
                     level++;
-                    speed = max(10, speed - 1); // Å¬‘¬“x‚ğ10‚Éİ’è
+                    speed = max(10, speed - 1); // æœ€å°é€Ÿåº¦ã‚’10ã«è¨­å®š
                 }
             }
             speedCount = 0;
         }
 
-        // ‰æ–Ê‚Ìˆê•”‚Ì‚İXV‚·‚é
+        // ç”»é¢ã®ä¸€éƒ¨ã®ã¿æ›´æ–°ã™ã‚‹
         field.Draw(hConsole, cursorX, cursorY);
         tetromino.Draw(field, hConsole, cursorX, cursorY);
 
-        // Ÿ‚ÌƒeƒgƒŠƒ~ƒm‚ğ‰E‘¤‚É•\¦
+        // æ¬¡ã®ãƒ†ãƒˆãƒªãƒŸãƒã‚’å³å´ã«è¡¨ç¤º
         DrawNextTetromino(hConsole, nextPiece, cursorX + fieldWidth + 2, cursorY);
 
         COORD coord;
@@ -318,7 +328,7 @@ bool PlayGame(HANDLE hConsole) {
 
     this_thread::sleep_for(chrono::seconds(2));
 
-    StopBGM(); // ƒQ[ƒ€ƒI[ƒo[‚Æ“¯‚ÉBGM‚ğ’â~
+    StopBGM(); // ã‚²ãƒ¼ãƒ ã‚ªãƒ¼ãƒãƒ¼ã¨åŒæ™‚ã«BGMã‚’åœæ­¢
     scorelec = score;
     levellec = level;
 
@@ -330,16 +340,17 @@ bool PlayGame(HANDLE hConsole) {
     return false;
 }
 
+// ãƒ¡ã‚¤ãƒ³é–¢æ•°
 int main() {
     srand(static_cast<unsigned int>(time(0)));
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_CURSOR_INFO cursorInfo;
     GetConsoleCursorInfo(hConsole, &cursorInfo);
-    cursorInfo.bVisible = false; // ƒJ[ƒ\ƒ‹‚ğ”ñ•\¦‚É‚·‚é
+    cursorInfo.bVisible = false; // ã‚«ãƒ¼ã‚½ãƒ«ã‚’éè¡¨ç¤ºã«ã™ã‚‹
     SetConsoleCursorInfo(hConsole, &cursorInfo);
 
     while (true) {
-        // ƒQ[ƒ€ŠJn‘O‚ÉŠm”F‚·‚é
+        // ã‚²ãƒ¼ãƒ é–‹å§‹å‰ã«ç¢ºèªã™ã‚‹
         COORD coord;
         coord.X = 0;
         coord.Y = 0;
@@ -351,11 +362,11 @@ int main() {
             break;
         }
 
-        ClearConsole(); // ‰æ–Ê‚ğƒNƒŠƒA
+        ClearConsole(); // ç”»é¢ã‚’ã‚¯ãƒªã‚¢
 
         bool playAgain = PlayGame(hConsole);
 
-        // ƒQ[ƒ€ƒI[ƒo[Œã‚ÉÄ“xŠm”F‚·‚é‘O‚É‰æ–Ê‚ğƒNƒŠƒA
+        // ã‚²ãƒ¼ãƒ ã‚ªãƒ¼ãƒãƒ¼å¾Œã«å†åº¦ç¢ºèªã™ã‚‹å‰ã«ç”»é¢ã‚’ã‚¯ãƒªã‚¢
         ClearConsole();
 
         coord.X = 0;
@@ -370,7 +381,7 @@ int main() {
             break;
         }
 
-        ClearConsole(); // ‰æ–Ê‚ğƒNƒŠƒA
+        ClearConsole(); // ç”»é¢ã‚’ã‚¯ãƒªã‚¢
     }
 
     cout << "Thank you for playing!" << endl;
